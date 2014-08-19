@@ -14,17 +14,25 @@ import (
 	"strings"
 )
 
-func parse_cli() ( *string, *string, *string ) {
+func parse_cli() ( *string, string, *string ) {
     
     inputFile := flag.String( "i", "<input>", "file to crypt" )
-    inputPwd  := flag.String( "p", "<password>", "password for encrypt" )
+    //inputPwd  := flag.String( "p", "<password>", "password for encrypt" )
 	inputTmp  := flag.String( "t", "<template>", "template file" )
 
     flag.Parse()
     
-    if flag.NFlag() < 3 {
+    if flag.NFlag() < 2 {
         log.Fatal("[ERROR] use -h to help")
     }
+    
+    var inputPwd string
+	fmt.Println( "Insert Password: " )
+	
+	_, err := fmt.Scanf("%s", &inputPwd)
+	if err != nil {
+		log.Fatal("[ERROR] Insert valid password to encode.")
+	}
 
     return inputFile, inputPwd, inputTmp
 }
@@ -47,15 +55,15 @@ func saveCrypted( szTemplate string, strBase64 string ) {
 
 
 func main( ) {
-    szFile, szPasswd, szTemplate := parse_cli()
+    pszFile, szPasswd, pszTemplate := parse_cli()
 
-    strClean, err := ioutil.ReadFile( *szFile )
+    strClean, err := ioutil.ReadFile( *pszFile )
     if err != nil {
         log.Fatal(err)
     }
 
     h := md5.New()
-    io.WriteString( h, *szPasswd )
+    io.WriteString( h, szPasswd )
 
     hashPwd := h.Sum(nil)
 
@@ -78,7 +86,7 @@ func main( ) {
 
     //fmt.Printf( "ENCODED (b64): %s\n", strBase64 )
 	
-	saveCrypted( *szTemplate, strBase64 )
+	saveCrypted( *pszTemplate, strBase64 )
 	
 	fmt.Println( "Template filled!" )
 }
